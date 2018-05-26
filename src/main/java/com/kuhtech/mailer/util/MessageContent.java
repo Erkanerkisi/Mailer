@@ -1,11 +1,14 @@
 package com.kuhtech.mailer.util;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -13,6 +16,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.internet.MimeUtility;
 
 import com.kuhtech.mailer.App;
 
@@ -147,5 +151,30 @@ public class MessageContent {
 			}
 		}
 	}
-
+	
+	public static String parseEmail(Message messages) throws UnsupportedEncodingException {
+		String email ="";
+		
+		Enumeration enumeration;
+		try {
+			enumeration = messages.getAllHeaders();
+		
+		while (enumeration.hasMoreElements()) {
+		Header header = (Header) enumeration.nextElement();
+		if (header.getName().equals("From")) {
+		//MessageContent.print(MimeUtility.decodeText(header.getValue());
+			final Pattern pattern = Pattern.compile("<(.+?)>"); 
+			final Matcher matcher = pattern.matcher(MimeUtility.decodeText(header.getValue())); 
+			matcher.find(); 
+			//System.out.println("Grup1:"+matcher.group(1)); // Prints String I want to extract
+			email = matcher.group(1);
+		}
+		}} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	
+	    return email;	
+	}
 }
