@@ -18,6 +18,8 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeUtility;
 
+import org.apache.log4j.Logger;
+
 import com.kuhtech.mailer.App;
 
 /**
@@ -26,7 +28,6 @@ import com.kuhtech.mailer.App;
  *
  */
 public class MessageContent {
-
 	public static String getMessageContent(Message message) throws MessagingException {
 		try {
 			Object content = message.getContent();
@@ -132,7 +133,8 @@ public class MessageContent {
 	
 	public static void print(String str) throws Exception {
 		 if (App.debugmode) 
-			 System.out.println(str);
+			 //System.out.println(str);
+			 App.logger.debug(str);
 	}
 
 	/**
