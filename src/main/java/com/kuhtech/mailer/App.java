@@ -40,10 +40,8 @@ public class App {
 		InvoiceDao invoicedao = (InvoiceDao) context.getBean("invoiceDao");
 		ConfigDao configdao = (ConfigDao) context.getBean("configDao");
 		Config config = configdao.getConfig();
-
+		
 		debugmode = Boolean.parseBoolean(config.getDebugmode());
-		// Set log4j Path dynamically
-		System.out.println(config.getLog4jPath());
 
 		// Imap server is being called
 		Properties properties = System.getProperties();
@@ -77,7 +75,6 @@ public class App {
 			} else {
 				cal.add(Calendar.YEAR, -1);
 			}
-			System.out.println("Saat => " + cal.getTime());
 			SearchTerm st = new ReceivedDateTerm(ComparisonTerm.GT, cal.getTime());
 			Message messages[] = inbox.search(st);
 
@@ -90,14 +87,13 @@ public class App {
 					if (messages[j].getReceivedDate().after(cal.getTime())) {
 
 						MessageContent.print("Title: " + messages[j].getSubject());
-						System.out.println("Fatura Saat => " + messages[j].getReceivedDate());
 						// Get Sequence from db
 						int seq = invoicedao.getSequence();
 						Mail mail = new Mail();
 						mail.setFrom(MessageContent.parseEmail(messages[j]));
 						String bodyCont = null;
 						Invoice invoice = new Invoice();
-						/*
+						/**
 						 * The email's content might be String type or Multipart Text(body) and html
 						 * must be one but attachmet might be more than one. Here are loops in these
 						 * types and operations have been added We are inserting these attachents, html
@@ -153,7 +149,7 @@ public class App {
 									int lineSeq = invoicedao.getLineSequence();
 									MessageContent.print("************HTML!!!!");
 									bodyCont = output.get(keys[i].toString()).toString().trim();
-									MessageContent.print("\t\t[[[" + bodyCont + "]]]");
+									//MessageContent.print("\t\t[[[" + bodyCont + "]]]");
 									if (!bodyCont.isEmpty()) {
 										invoicedao.insertAsClob(bodyCont, keys[i].toString(), seq, lineSeq);
 									}
@@ -161,7 +157,7 @@ public class App {
 									int lineSeq = invoicedao.getLineSequence();
 									MessageContent.print("************BODY!!!!");
 									bodyCont = output.get(keys[i].toString()).toString().trim();
-									MessageContent.print("\t\t[[[" + bodyCont + "]]]");
+									//MessageContent.print("\t\t[[[" + bodyCont + "]]]");
 									if (!bodyCont.isEmpty()) {
 										invoicedao.insertAsClob(bodyCont, keys[i].toString(), seq, lineSeq);
 									}
@@ -170,7 +166,6 @@ public class App {
 						}
 						mail.setId(seq);
 						mail.setTo("KUHEARSIV");
-						// mail.setFrom(InternetAddress.toString(messages[j].getFrom()));
 						mail.setSubject(messages[j].getSubject());
 						mail.setInvoice_number(invoice.getInvoiceNo());
 						mail.setVendor_name(invoice.getPartyName());

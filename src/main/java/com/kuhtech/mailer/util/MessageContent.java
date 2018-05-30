@@ -132,9 +132,10 @@ public class MessageContent {
 	}
 	
 	public static void print(String str) throws Exception {
-		 if (App.debugmode) 
+		 if (App.debugmode) { 
 			 //System.out.println(str);
-			 App.logger.debug(str);
+			 App.logger.info(str);
+			 }
 	}
 
 	/**
