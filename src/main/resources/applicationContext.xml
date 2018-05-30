@@ -20,8 +20,6 @@
 	</bean>
 	<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 
-    <context:property-placeholder location="classpath*:config.properties"/>
-
 	<context:component-scan base-package="com.kuhtech.mailer" />
 	
 
