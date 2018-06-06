@@ -1,4 +1,4 @@
-package com.kuhtech.mailer.Dao;
+package com.kuhtech.mailer.dao;
 
 import java.io.IOException;
 import java.io.InputStream;

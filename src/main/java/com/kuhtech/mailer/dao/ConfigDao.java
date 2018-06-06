@@ -1,4 +1,4 @@
-package com.kuhtech.mailer.Dao;
+package com.kuhtech.mailer.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

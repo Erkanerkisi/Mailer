@@ -21,8 +21,8 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.kuhtech.mailer.Dao.ConfigDao;
-import com.kuhtech.mailer.Dao.InvoiceDao;
+import com.kuhtech.mailer.dao.ConfigDao;
+import com.kuhtech.mailer.dao.InvoiceDao;
 import com.kuhtech.mailer.model.Config;
 import com.kuhtech.mailer.model.Invoice;
 import com.kuhtech.mailer.model.Mail;
