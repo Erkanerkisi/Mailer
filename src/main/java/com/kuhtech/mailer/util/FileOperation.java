@@ -3,6 +3,7 @@ package com.kuhtech.mailer.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -110,5 +111,11 @@ public class FileOperation {
 
 		return invoice;
 	}
-
+      public static String getUUID () 
+	{
+		  
+		UUID uuid = UUID.randomUUID();
+		String randomUUIDString = uuid.toString();
+		return randomUUIDString;
+	} 
 }

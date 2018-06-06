@@ -18,6 +18,7 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.stereotype.Component;
 
 import com.kuhtech.mailer.model.Mail;
+import com.kuhtech.mailer.util.*;
 
 /**
  * @author DBOptimize
@@ -39,8 +40,8 @@ public class InvoiceDao {
 
 	public int insertInvoice(Mail v) {
 		
-		String query = "insert into xxah_earsiv_mailer(header_id,to_mail,from_mail,subject,invoice_number,vendor_name,creation_date) "
-				+ "values(" + v.getId() + ",'" + v.getTo() + "','" + v.getFrom() + "','" + v.getSubject() + "','" + v.getInvoice_number()
+		String query = "insert into xxah_earsiv_mailer(header_id,to_mail,from_mail,cc,bcc,subject,invoice_number,vendor_name,creation_date) "
+				+ "values(" + v.getId() + ",'" + v.getTo() + "','" + v.getFrom() + "','" + v.getCc() + "','" + v.getBcc() + "','" + v.getSubject() + "','" + v.getInvoice_number()
 				+ "','" + v.getVendor_name() + "',sysdate)";
 		return jdbcTemplate.update(query);
 	}
@@ -57,15 +58,17 @@ public class InvoiceDao {
 
 	}
 
-	public int insertAsClob(String data, String type, int seq,int lineSeq) throws IOException {
-
-		String s = "insert into xxah_earsiv_files (header_id,line_id,type,body) values (?,?,?,?)";
+	public int insertAsClob(String data, String type, int seq,int lineSeq,String suffix) throws IOException {
+		String uuid = FileOperation.getUUID();
+		String s = "insert into xxah_earsiv_files (header_id,line_id,type,body,suffix,uuid) values (?,?,?,?,?,?)";
 		return jdbcTemplate.update(s, new PreparedStatementSetter() {
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setInt(1, seq);
 				ps.setInt(2, lineSeq);
 				ps.setString(3, type);
 				lobHandler.getLobCreator().setClobAsString(ps, 4, data);
+				ps.setString(5, suffix);
+				ps.setString(6, uuid);
 				// lobHandler.getLobCreator().setBlobAsBinaryStream(ps, 2, fileAsStream,
 				// fileAsStream.toString().getBytes().length);
 			}
@@ -73,12 +76,13 @@ public class InvoiceDao {
 
 	}
 
-	public int insertAsBlob(Map attachment, int seq, String type,int lineSeq) throws IOException, MessagingException {
+	public int insertAsBlob(Map attachment, int seq, String type,int lineSeq,String suffix) throws IOException, MessagingException {
 
 		MimeBodyPart mimeBodyPart = (MimeBodyPart) attachment.get("mimeBodyPart");
 
 		final InputStream blobIs = mimeBodyPart.getInputStream();
-		return jdbcTemplate.execute("INSERT INTO xxah_earsiv_files (header_id,line_id,type, attachment) VALUES (?, ?,?,?)",
+		String uuid = FileOperation.getUUID();
+		return jdbcTemplate.execute("INSERT INTO xxah_earsiv_files (header_id,line_id,type, attachment,suffix,uuid) VALUES (?,?,?,?,?,?)",
 				new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
 					protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
 						ps.setLong(1, seq);
@@ -92,7 +96,8 @@ public class InvoiceDao {
 
 							e.printStackTrace();
 						}
-
+						ps.setString(5, suffix);	
+						ps.setString(6,uuid);
 					}
 				});
 

@@ -11,6 +11,7 @@ import javax.mail.Message;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.InternetAddress;
 import javax.mail.search.ComparisonTerm;
 import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
@@ -42,7 +43,7 @@ public class App {
 		Config config = configdao.getConfig();
 		
 		debugmode = Boolean.parseBoolean(config.getDebugmode());
-
+       
 		// Imap server is being called
 		Properties properties = System.getProperties();
 		properties.setProperty("mail.imap.socketFactory.port", config.getPort());
@@ -59,13 +60,16 @@ public class App {
 				 * 
 				 */
 				store.connect(config.getHost(), config.getUsername(), config.getPassword());
+			
 			} catch (Exception e) {
 			}
 			IMAPFolder inbox = (IMAPFolder) store.getFolder("Inbox");
 			inbox.open(Folder.READ_ONLY);
 			// Get messages set time
 			Calendar cal = Calendar.getInstance();
-
+			
+			MessageContent.print("Day Of Month :"+ Calendar.DAY_OF_MONTH);
+			
 			if (config.getTimeVariation().equals("D")) {
 				cal.add(Calendar.DAY_OF_MONTH, -1 * config.getInterval());
 			} else if (config.getTimeVariation().equals("H")) {
@@ -75,11 +79,14 @@ public class App {
 			} else {
 				cal.add(Calendar.YEAR, -1);
 			}
+			
+			MessageContent.print("Messages Get Time:"+ cal.getTime());
+			
 			SearchTerm st = new ReceivedDateTerm(ComparisonTerm.GT, cal.getTime());
 			Message messages[] = inbox.search(st);
 
 			MessageContent.print("Reading messages...");
-
+			MessageContent.print("MessagesLength:"+ messages.length);
 			// turn all messages to process earsiv invoices
 			for (int j = 0; j < messages.length; j++) {
 				for (Address a : messages[j].getFrom())
@@ -91,7 +98,12 @@ public class App {
 						int seq = invoicedao.getSequence();
 						Mail mail = new Mail();
 						mail.setFrom(MessageContent.parseEmail(messages[j]));
+						
+						mail.setCc(InternetAddress.toString(messages[j].getRecipients(Message.RecipientType.CC)));
+						mail.setBcc(InternetAddress.toString(messages[j].getRecipients(Message.RecipientType.BCC)));
+						
 						String bodyCont = null;
+						String ext = null;
 						Invoice invoice = new Invoice();
 						/**
 						 * The email's content might be String type or Multipart Text(body) and html
@@ -121,7 +133,8 @@ public class App {
 										int lineSeq = invoicedao.getLineSequence();
 										Map attachment = (Map) attachments.get(k);
 										MessageContent.print("atachment var => " + attachment.get("fileName"));
-										invoicedao.insertAsBlob(attachment, seq, keys[i].toString(), lineSeq);
+										ext = FilenameUtils.getExtension((String) attachment.get("fileName"));
+										invoicedao.insertAsBlob(attachment, seq, keys[i].toString(), lineSeq,ext);
 
 										/*
 										 * If file is zip, unzip file and parse xml to find invoice number and vendor
@@ -151,7 +164,7 @@ public class App {
 									bodyCont = output.get(keys[i].toString()).toString().trim();
 									//MessageContent.print("\t\t[[[" + bodyCont + "]]]");
 									if (!bodyCont.isEmpty()) {
-										invoicedao.insertAsClob(bodyCont, keys[i].toString(), seq, lineSeq);
+										invoicedao.insertAsClob(bodyCont, keys[i].toString(), seq, lineSeq,ext);
 									}
 								} else {
 									int lineSeq = invoicedao.getLineSequence();
@@ -159,7 +172,7 @@ public class App {
 									bodyCont = output.get(keys[i].toString()).toString().trim();
 									//MessageContent.print("\t\t[[[" + bodyCont + "]]]");
 									if (!bodyCont.isEmpty()) {
-										invoicedao.insertAsClob(bodyCont, keys[i].toString(), seq, lineSeq);
+										invoicedao.insertAsClob(bodyCont, keys[i].toString(), seq, lineSeq,ext);
 									}
 								}
 							}
